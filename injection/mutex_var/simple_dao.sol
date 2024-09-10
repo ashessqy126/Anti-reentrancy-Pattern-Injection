@@ -1,0 +1,31 @@
+/*
+ * @source: http://blockchain.unica.it/projects/ethereum-survey/attacks.html#simpledao
+ * @author: -
+ * @vulnerable_at_lines: 19
+ */
+
+pragma solidity ^0.4.2;
+
+contract SimpleDAO {
+    bool _injected_mutex_var = false;
+  mapping (address => uint) public credit;
+
+  function donate(address to) payable {
+    credit[to] += msg.value;
+  }
+
+  function withdraw(uint amount) {
+    if (credit[msg.sender]>= amount) {
+      // <yes> <report> REENTRANCY
+       require(_injected_mutex_var);
+       _injected_mutex_var = true;
+      bool res = msg.sender.call.value(amount)();
+       _injected_mutex_var = false;
+      credit[msg.sender]-=amount;
+    }
+  }
+
+  function queryCredit(address to) returns (uint){
+    return credit[to];
+  }
+}
