@@ -61,7 +61,7 @@ contract MONEY_BOX
         if( acc.balance>=MinSum && acc.balance>=_am && now>acc.unlockTime)
         {
             // <yes> <report> REENTRANCY
-               require(block.timestamp >= lastTime);
+               require(block.timestamp >= lastTime + 500);
                lastTime = block.timestamp;
             if(msg.sender.call.value(_am)())
             {

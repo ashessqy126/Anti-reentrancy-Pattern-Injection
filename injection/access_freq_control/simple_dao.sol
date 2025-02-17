@@ -17,7 +17,7 @@ contract SimpleDAO {
   function withdraw(uint amount) {
     if (credit[msg.sender]>= amount) {
       // <yes> <report> REENTRANCY
-      require(block.timestamp >= lastTime);
+      require(block.timestamp >= lastTime + 500);
       lastTime = block.timestamp;
       bool res = msg.sender.call.value(amount)();
       credit[msg.sender]-=amount;

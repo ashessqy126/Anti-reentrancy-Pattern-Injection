@@ -19,9 +19,11 @@ contract ACCURAL_DEPOSIT
     bool intitalized;
 
      modifier injected_swap(){
+     if(!_injected_mutex_var){
          _injected_mutex_var = true;
          _;
          _injected_mutex_var = false;
+        }
      }
     
     function SetMinSum(uint _val)
@@ -59,7 +61,6 @@ contract ACCURAL_DEPOSIT
         if(balances[msg.sender]>=MinSum && balances[msg.sender]>=_am)
         {
             // <yes> <report> REENTRANCY
-               require(_injected_mutex_var);
             if(msg.sender.call.value(_am)())
             {
                 balances[msg.sender]-=_am;

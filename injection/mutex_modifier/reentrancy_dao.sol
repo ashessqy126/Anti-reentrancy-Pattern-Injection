@@ -12,9 +12,11 @@ contract ReentrancyDAO {
     uint balance;
 
      modifier injected_swap(){
+     if(!_injected_mutex_var){
          _injected_mutex_var = true;
          _;
          _injected_mutex_var = false;
+        }
      }
 
     function withdrawAll() public  injected_swap {
@@ -22,7 +24,6 @@ contract ReentrancyDAO {
         if (oCredit > 0) {
             balance -= oCredit;
             // <yes> <report> REENTRANCY
-            require(_injected_mutex_var);
             bool callResult = msg.sender.call.value(oCredit)();
             require (callResult);
             credit[msg.sender] = 0;

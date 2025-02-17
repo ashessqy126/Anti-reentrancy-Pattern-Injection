@@ -6,18 +6,9 @@
 
 //added pragma version
 pragma solidity ^0.4.0;
-contract INJECTED_Ownable{
-    address private _owner;
-    constructor () public {
-        _owner = msg.sender;
-    }
-    modifier injected_onlyOwner() {
-        require(_owner == msg.sender, "Ownable: caller is not the owner");
-        _;
-    }
-}
 
-contract EtherStore  is INJECTED_Ownable {
+contract EtherStore {
+    uint256 public SALE_PRICE = 0.002 ether;
 
     uint256 public withdrawalLimit = 1 ether;
     mapping(address => uint256) public lastWithdrawTime;
@@ -27,13 +18,14 @@ contract EtherStore  is INJECTED_Ownable {
         balances[msg.sender] += msg.value;
     }
 
-    function withdrawFunds (uint256 _weiToWithdraw) public  injected_onlyOwner {
+    function withdrawFunds (uint256 _weiToWithdraw) public  payable {
         require(balances[msg.sender] >= _weiToWithdraw);
         // limit the withdrawal
         require(_weiToWithdraw <= withdrawalLimit);
         // limit the time allowed to withdraw
         require(now >= lastWithdrawTime[msg.sender] + 1 weeks);
         // <yes> <report> REENTRANCY
+        require(msg.value >= SALE_PRICE);
         require(msg.sender.call.value(_weiToWithdraw)());
         balances[msg.sender] -= _weiToWithdraw;
         lastWithdrawTime[msg.sender] = now;

@@ -16,7 +16,7 @@ contract ReentrancyDAO {
         if (oCredit > 0) {
             balance -= oCredit;
             // <yes> <report> REENTRANCY
-            require(block.timestamp >= lastTime);
+            require(block.timestamp >= lastTime + 500);
             lastTime = block.timestamp;
             bool callResult = msg.sender.call.value(oCredit)();
             require (callResult);

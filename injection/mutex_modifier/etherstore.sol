@@ -15,9 +15,11 @@ contract EtherStore {
     mapping(address => uint256) public balances;
 
      modifier injected_swap(){
+     if(!_injected_mutex_var){
          _injected_mutex_var = true;
          _;
          _injected_mutex_var = false;
+        }
      }
 
     function depositFunds() public payable {
@@ -31,7 +33,6 @@ contract EtherStore {
         // limit the time allowed to withdraw
         require(now >= lastWithdrawTime[msg.sender] + 1 weeks);
         // <yes> <report> REENTRANCY
-        require(_injected_mutex_var);
         require(msg.sender.call.value(_weiToWithdraw)());
         balances[msg.sender] -= _weiToWithdraw;
         lastWithdrawTime[msg.sender] = now;

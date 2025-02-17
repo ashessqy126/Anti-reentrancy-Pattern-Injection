@@ -5,18 +5,9 @@
  */
 
 pragma solidity ^0.4.18;
-contract INJECTED_Ownable{
-    address private _owner;
-    constructor () public {
-        _owner = msg.sender;
-    }
-    modifier injected_onlyOwner() {
-        require(_owner == msg.sender, "Ownable: caller is not the owner");
-        _;
-    }
-}
 
-contract Reentrance  is INJECTED_Ownable {
+contract Reentrance {
+    uint256 public SALE_PRICE = 0.002 ether;
 
   mapping(address => uint) public balances;
 
@@ -28,9 +19,10 @@ contract Reentrance  is INJECTED_Ownable {
     return balances[_who];
   }
 
-  function withdraw(uint _amount) public  injected_onlyOwner {
+  function withdraw(uint _amount) public  payable {
     if(balances[msg.sender] >= _amount) {
       // <yes> <report> REENTRANCY
+         require(msg.value >= SALE_PRICE);
       if(msg.sender.call.value(_amount)()) {
         _amount;
       }

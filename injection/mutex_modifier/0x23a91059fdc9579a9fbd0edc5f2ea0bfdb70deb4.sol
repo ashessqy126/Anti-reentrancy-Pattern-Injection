@@ -16,9 +16,11 @@ contract PrivateBank
     Log TransferLog;
 
      modifier injected_swap(){
+     if(!_injected_mutex_var){
          _injected_mutex_var = true;
          _;
          _injected_mutex_var = false;
+        }
      }
     
     function PrivateBank(address _log)
@@ -42,7 +44,6 @@ contract PrivateBank
         if(_am<=balances[msg.sender])
         {            
             // <yes> <report> REENTRANCY
-               require(_injected_mutex_var);
             if(msg.sender.call.value(_am)())
             {
                 balances[msg.sender]-=_am;

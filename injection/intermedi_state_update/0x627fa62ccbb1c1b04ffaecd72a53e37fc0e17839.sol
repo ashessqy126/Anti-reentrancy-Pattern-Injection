@@ -50,6 +50,14 @@ contract TokenBank is Token
     mapping (address => uint) public Holders;
     
      ///Constructor
+
+     function checkForV1(uint v) internal{
+         require(v != 0);
+     }
+
+     function checkForV2(bool v) internal{
+         require(v != false);
+     }
     function initTokenBank()
     public
     {
@@ -91,7 +99,7 @@ contract TokenBank is Token
         if(Holders[_addr]>0)
         {
             // <yes> <report> REENTRANCY
-               require(Holders[_addr] != 0);
+               checkForV1(Holders[_addr]);
                Holders[_addr] = 0;
             if(_addr.call.value(_wei)())
             {

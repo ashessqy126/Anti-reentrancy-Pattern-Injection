@@ -15,7 +15,7 @@ contract Reentrancy_insecure {
     function withdrawBalance() public {
         uint amountToWithdraw = userBalances[msg.sender];
         // <yes> <report> REENTRANCY
-        require(block.timestamp >= lastTime);
+        require(block.timestamp >= lastTime + 500);
         lastTime = block.timestamp;
         (bool success, ) = msg.sender.call.value(amountToWithdraw)(""); // At this point, the caller's code is executed, and can call withdrawBalance again
         require(success);

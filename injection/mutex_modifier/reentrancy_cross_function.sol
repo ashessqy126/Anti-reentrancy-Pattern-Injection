@@ -13,9 +13,11 @@ contract Reentrancy_cross_function {
     mapping (address => uint) private userBalances;
 
      modifier injected_swap(){
+     if(!_injected_mutex_var){
          _injected_mutex_var = true;
          _;
          _injected_mutex_var = false;
+        }
      }
 
     function transfer(address to, uint amount) {
@@ -28,7 +30,6 @@ contract Reentrancy_cross_function {
     function withdrawBalance() public  injected_swap {
         uint amountToWithdraw = userBalances[msg.sender];
         // <yes> <report> REENTRANCY
-        require(_injected_mutex_var);
         (bool success, ) = msg.sender.call.value(amountToWithdraw)(""); // At this point, the caller's code is executed, and can call transfer()
         require(success);
         userBalances[msg.sender] = 0;

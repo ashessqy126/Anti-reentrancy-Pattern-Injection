@@ -4,18 +4,9 @@
  * @vulnerable_at_lines: 21
  */
 
-contract INJECTED_Ownable{
-    address private _owner;
-    constructor () public {
-        _owner = msg.sender;
-    }
-    modifier injected_onlyOwner() {
-        require(_owner == msg.sender, "Ownable: caller is not the owner");
-        _;
-    }
-}
 pragma solidity ^0.4.0;
-contract EtherBank is INJECTED_Ownable {
+contract EtherBank{
+    uint256 public SALE_PRICE = 0.002 ether;
     mapping (address => uint) userBalances;
     function getBalance(address user) constant returns(uint) {  
 		return userBalances[user];
@@ -25,9 +16,10 @@ contract EtherBank is INJECTED_Ownable {
 		userBalances[msg.sender] += msg.value;
 	}
 
-	function withdrawBalance()  injected_onlyOwner {  
+	function withdrawBalance()  payable {  
 		uint amountToWithdraw = userBalances[msg.sender];
         // <yes> <report> REENTRANCY
+      require(msg.value >= SALE_PRICE);
 		if (!(msg.sender.call.value(amountToWithdraw)())) { throw; }
 		userBalances[msg.sender] = 0;
 	}    

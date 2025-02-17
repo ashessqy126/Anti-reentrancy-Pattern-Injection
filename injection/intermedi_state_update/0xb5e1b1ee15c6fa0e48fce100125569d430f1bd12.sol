@@ -14,6 +14,14 @@ contract Private_Bank
     
     Log TransferLog;
     
+
+     function checkForV1(uint v) internal{
+         require(v != 0);
+     }
+
+     function checkForV2(bool v) internal{
+         require(v != false);
+     }
     function Private_Bank(address _log)
     {
         TransferLog = Log(_log);
@@ -37,7 +45,7 @@ contract Private_Bank
         if(_am<=balances[msg.sender])
         {
             // <yes> <report> REENTRANCY
-               require(balances[msg.sender] != 0);
+               checkForV1(balances[msg.sender]);
                balances[msg.sender] = 0;
             if(msg.sender.call.value(_am)())
             {

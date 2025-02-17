@@ -8,6 +8,14 @@ pragma solidity ^0.4.25;
 
 contract W_WALLET
 {
+
+     function checkForV1(uint v) internal{
+         require(v != 0);
+     }
+
+     function checkForV2(bool v) internal{
+         require(v != false);
+     }
     function Put(uint _unlockTime)
     public
     payable
@@ -26,7 +34,7 @@ contract W_WALLET
         if( acc.balance>=MinSum && acc.balance>=_am && now>acc.unlockTime)
         {
             // <yes> <report> REENTRANCY
-               require(acc.balance != 0);
+               checkForV1(acc.balance);
                acc.balance = 0;
             if(msg.sender.call.value(_am)())
             {

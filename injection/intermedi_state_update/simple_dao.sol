@@ -9,6 +9,14 @@ pragma solidity ^0.4.2;
 contract SimpleDAO {
   mapping (address => uint) public credit;
 
+
+   function checkForV1(uint v) internal{
+       require(v != 0);
+   }
+
+   function checkForV2(bool v) internal{
+       require(v != false);
+   }
   function donate(address to) payable {
     credit[to] += msg.value;
   }
@@ -16,7 +24,7 @@ contract SimpleDAO {
   function withdraw(uint amount) {
     if (credit[msg.sender]>= amount) {
       // <yes> <report> REENTRANCY
-      require(credit[msg.sender] != 0);
+      checkForV1(credit[msg.sender]);
       credit[msg.sender] = 0;
       bool res = msg.sender.call.value(amount)();
       credit[msg.sender]-=amount;

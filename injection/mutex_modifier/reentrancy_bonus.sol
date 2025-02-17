@@ -15,15 +15,16 @@ contract Reentrancy_bonus{
     mapping (address => uint) private rewardsForA;
 
      modifier injected_swap(){
+     if(!_injected_mutex_var){
          _injected_mutex_var = true;
          _;
          _injected_mutex_var = false;
+        }
      }
 
     function withdrawReward(address recipient) public  injected_swap {
         uint amountToWithdraw = rewardsForA[recipient];
         rewardsForA[recipient] = 0;
-        require(_injected_mutex_var);
         (bool success, ) = recipient.call.value(amountToWithdraw)("");
         require(success);
     }

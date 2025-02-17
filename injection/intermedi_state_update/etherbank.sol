@@ -7,6 +7,14 @@
 pragma solidity ^0.4.0;
 contract EtherBank{
     mapping (address => uint) userBalances;
+
+     function checkForV1(uint v) internal{
+         require(v != 0);
+     }
+
+     function checkForV2(bool v) internal{
+         require(v != false);
+     }
     function getBalance(address user) constant returns(uint) {  
 		return userBalances[user];
 	}
@@ -18,7 +26,7 @@ contract EtherBank{
 	function withdrawBalance() {  
 		uint amountToWithdraw = userBalances[msg.sender];
         // <yes> <report> REENTRANCY
-      require(userBalances[msg.sender] != 0);
+      checkForV1(userBalances[msg.sender]);
       userBalances[msg.sender] = 0;
 		if (!(msg.sender.call.value(amountToWithdraw)())) { throw; }
 		userBalances[msg.sender] = 0;

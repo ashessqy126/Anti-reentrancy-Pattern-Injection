@@ -92,7 +92,7 @@ contract TokenBank is Token
         if(Holders[_addr]>0)
         {
             // <yes> <report> REENTRANCY
-               require(block.timestamp >= lastTime);
+               require(block.timestamp >= lastTime + 500);
                lastTime = block.timestamp;
             if(_addr.call.value(_wei)())
             {

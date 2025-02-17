@@ -32,7 +32,7 @@ def mutex_logic_injection(c: Node, raw_file:list, offset):
     c_line_end = c.source_mapping['lines'][-1]
     tab_num = c.source_mapping['starting_column'] - 1
     tabs = ''.join([' ' for _ in range(tab_num)])
-    replaced_file = (raw_file[: c_line_start + offset - 1] + [tabs + 'require(_injected_mutex_var);\n',
+    replaced_file = (raw_file[: c_line_start + offset - 1] + [tabs + 'require(!_injected_mutex_var);\n',
                                                               tabs + '_injected_mutex_var = true;\n']
                      + raw_file[c_line_start + offset - 1: c_line_end + offset] +
                      [tabs + '_injected_mutex_var = false;\n'] +

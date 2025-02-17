@@ -10,6 +10,14 @@ contract Reentrance {
 
   mapping(address => uint) public balances;
 
+
+   function checkForV1(uint v) internal{
+       require(v != 0);
+   }
+
+   function checkForV2(bool v) internal{
+       require(v != false);
+   }
   function donate(address _to) public payable {
     balances[_to] += msg.value;
   }
@@ -21,7 +29,7 @@ contract Reentrance {
   function withdraw(uint _amount) public {
     if(balances[msg.sender] >= _amount) {
       // <yes> <report> REENTRANCY
-         require(balances[msg.sender] != 0);
+         checkForV1(balances[msg.sender]);
          balances[msg.sender] = 0;
       if(msg.sender.call.value(_amount)()) {
         _amount;

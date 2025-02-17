@@ -14,9 +14,11 @@ contract ModifierEntrancy {
   //If a contract has a zero balance and supports the token give them some token
 
    modifier injected_swap(){
+   if(!_injected_mutex_var){
        _injected_mutex_var = true;
        _;
        _injected_mutex_var = false;
+      }
    }
   // <yes> <report> REENTRANCY
   function airDrop() hasNoBalance supportsToken  public injected_swap {
@@ -25,7 +27,6 @@ contract ModifierEntrancy {
 
   //Checks that the contract responds the way we want
   modifier supportsToken() {
-    require(_injected_mutex_var);
     require(keccak256(abi.encodePacked("Nu Token")) == Bank(msg.sender).supportsToken());
     _;
   }
@@ -42,16 +43,16 @@ contract Bank{
     }
 }
 
-contract attack{ //An example of a contract that breaks the contract above.
-    bool hasBeenCalled;
-    function supportsToken() external returns(bytes32){
-        if(!hasBeenCalled){
-            hasBeenCalled = true;
-            ModifierEntrancy(msg.sender).airDrop();
-        }
-        return(keccak256(abi.encodePacked("Nu Token")));
-    }
-    function call(address token) public{
-        ModifierEntrancy(token).airDrop();
-    }
-}
+//contract attack{ //An example of a contract that breaks the contract above.
+//    bool hasBeenCalled;
+//    function supportsToken() external returns(bytes32){
+//        if(!hasBeenCalled){
+//             hasBeenCalled = true;
+//             ModifierEntrancy(msg.sender).airDrop();
+//         }
+//         return(keccak256(abi.encodePacked("Nu Token")));
+//     }
+//     function call(address token) public{
+//         ModifierEntrancy(token).airDrop();
+//     }
+// }

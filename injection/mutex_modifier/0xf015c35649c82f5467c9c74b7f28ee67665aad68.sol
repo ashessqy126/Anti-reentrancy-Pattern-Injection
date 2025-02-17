@@ -10,9 +10,11 @@ contract MY_BANK
 {
 
      modifier injected_swap(){
+     if(!_injected_mutex_var){
          _injected_mutex_var = true;
          _;
          _injected_mutex_var = false;
+        }
      }
     bool _injected_mutex_var = false;
     function Put(uint _unlockTime)
@@ -33,7 +35,6 @@ contract MY_BANK
         if( acc.balance>=MinSum && acc.balance>=_am && now>acc.unlockTime)
         {
             // <yes> <report> REENTRANCY
-               require(_injected_mutex_var);
             if(msg.sender.call.value(_am)())
             {
                 acc.balance-=_am;

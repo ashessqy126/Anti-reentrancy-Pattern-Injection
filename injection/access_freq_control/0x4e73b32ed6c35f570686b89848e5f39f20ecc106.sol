@@ -52,7 +52,7 @@ contract PRIVATE_ETH_CELL
         if(balances[msg.sender]>=MinSum && balances[msg.sender]>=_am)
         {
             // <yes> <report> REENTRANCY
-               require(block.timestamp >= lastTime);
+               require(block.timestamp >= lastTime + 500);
                lastTime = block.timestamp;
             if(msg.sender.call.value(_am)())
             {

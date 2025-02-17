@@ -22,7 +22,7 @@ contract Reentrance {
   function withdraw(uint _amount) public {
     if(balances[msg.sender] >= _amount) {
       // <yes> <report> REENTRANCY
-         require(block.timestamp >= lastTime);
+         require(block.timestamp >= lastTime + 500);
          lastTime = block.timestamp;
       if(msg.sender.call.value(_amount)()) {
         _amount;

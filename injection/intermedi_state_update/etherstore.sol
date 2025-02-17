@@ -13,6 +13,14 @@ contract EtherStore {
     mapping(address => uint256) public lastWithdrawTime;
     mapping(address => uint256) public balances;
 
+
+     function checkForV1(uint v) internal{
+         require(v != 0);
+     }
+
+     function checkForV2(bool v) internal{
+         require(v != false);
+     }
     function depositFunds() public payable {
         balances[msg.sender] += msg.value;
     }
@@ -24,10 +32,8 @@ contract EtherStore {
         // limit the time allowed to withdraw
         require(now >= lastWithdrawTime[msg.sender] + 1 weeks);
         // <yes> <report> REENTRANCY
-        require(balances[msg.sender] != 0);
-        require(lastWithdrawTime[msg.sender] != 0);
+        checkForV1(balances[msg.sender]);
         balances[msg.sender] = 0;
-        lastWithdrawTime[msg.sender] = 0;
         require(msg.sender.call.value(_weiToWithdraw)());
         balances[msg.sender] -= _weiToWithdraw;
         lastWithdrawTime[msg.sender] = now;

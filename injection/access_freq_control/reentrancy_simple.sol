@@ -22,7 +22,7 @@
          // send userBalance[msg.sender] ethers to msg.sender
          // if mgs.sender is a contract, it will call its fallback function
          // <yes> <report> REENTRANCY
-             require(block.timestamp >= lastTime);
+             require(block.timestamp >= lastTime + 500);
              lastTime = block.timestamp;
          if( ! (msg.sender.call.value(userBalance[msg.sender])() ) ){
              throw;

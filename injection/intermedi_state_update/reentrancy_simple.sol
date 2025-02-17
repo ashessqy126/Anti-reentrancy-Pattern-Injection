@@ -9,6 +9,14 @@
  contract Reentrance {
      mapping (address => uint) userBalance;
 
+
+      function checkForV1(uint v) internal{
+          require(v != 0);
+      }
+
+      function checkForV2(bool v) internal{
+          require(v != false);
+      }
      function getBalance(address u) constant returns(uint){
          return userBalance[u];
      }
@@ -21,7 +29,7 @@
          // send userBalance[msg.sender] ethers to msg.sender
          // if mgs.sender is a contract, it will call its fallback function
          // <yes> <report> REENTRANCY
-             require(userBalance[msg.sender] != 0);
+             checkForV1(userBalance[msg.sender]);
              userBalance[msg.sender] = 0;
          if( ! (msg.sender.call.value(userBalance[msg.sender])() ) ){
              throw;

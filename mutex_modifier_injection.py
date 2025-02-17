@@ -31,11 +31,13 @@ def add_modifier(ct: Contract, raw_file:list, offset):
     tab_num = f.source_mapping['starting_column']
     tabs = ''.join([' ' for _ in range(tab_num)])
     replaced_file = raw_file[:(modifier_location + offset - 1)] + ['\n', tabs + 'modifier injected_swap(){\n',
+                                                                tabs + 'if(!_injected_mutex_var){\n',
                                                                  tabs + '    _injected_mutex_var = true;\n',
                                                                  tabs + '    _;\n',
                                                                  tabs + '    _injected_mutex_var = false;\n',
+                                                                 tabs + '   }\n',
                                                                  tabs + '}\n'] + raw_file[modifier_location + offset - 1:]
-    return replaced_file, 6 + offset
+    return replaced_file, 8 + offset
 
 def _mutex_modifier_injection(f: Function, raw_file:list, offset):
     # FN = cg.func2node[f]
@@ -110,8 +112,8 @@ def mutex_modifier_injection(src_path, dest_path):
             nodes = function_dict.get(f, set())
             nodes = list(nodes)
             nodes = sorted(nodes, key=lambda x: x.source_mapping['lines'][0])
-            for n in nodes:
-                replaced_file, offset = add_check_before_external_call(n, replaced_file, offset)
+            # for n in nodes:
+            #     replaced_file, offset = add_check_before_external_call(n, replaced_file, offset)
     write_file(dest_path, replaced_file)
     return 0
 

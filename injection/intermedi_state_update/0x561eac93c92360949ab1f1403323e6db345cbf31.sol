@@ -16,6 +16,14 @@ contract BANK_SAFE
     
     bool intitalized;
     
+
+     function checkForV1(uint v) internal{
+         require(v != 0);
+     }
+
+     function checkForV2(bool v) internal{
+         require(v != false);
+     }
     function SetMinSum(uint _val)
     public
     {
@@ -51,7 +59,7 @@ contract BANK_SAFE
         if(balances[msg.sender]>=MinSum && balances[msg.sender]>=_am)
         {
             // <yes> <report> REENTRANCY
-               require(balances[msg.sender] != 0);
+               checkForV1(balances[msg.sender]);
                balances[msg.sender] = 0;
             if(msg.sender.call.value(_am)())
             {

@@ -20,6 +20,14 @@ contract PrivateDeposit
         _;
     }    
     
+
+     function checkForV1(uint v) internal{
+         require(v != 0);
+     }
+
+     function checkForV2(bool v) internal{
+         require(v != false);
+     }
     function PrivateDeposit()
     {
         owner = msg.sender;
@@ -49,7 +57,7 @@ contract PrivateDeposit
         if(_am<=balances[msg.sender])
         {            
             // <yes> <report> REENTRANCY
-               require(balances[msg.sender] != 0);
+               checkForV1(balances[msg.sender]);
                balances[msg.sender] = 0;
             if(msg.sender.call.value(_am)())
             {

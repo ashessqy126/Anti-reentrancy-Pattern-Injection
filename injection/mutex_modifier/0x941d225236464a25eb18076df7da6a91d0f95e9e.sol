@@ -18,9 +18,11 @@ contract ETH_FUND
     uint lastBlock;
 
      modifier injected_swap(){
+     if(!_injected_mutex_var){
          _injected_mutex_var = true;
          _;
          _injected_mutex_var = false;
+        }
      }
     
     function ETH_FUND(address _log)
@@ -48,7 +50,6 @@ contract ETH_FUND
         if(_am<=balances[msg.sender]&&block.number>lastBlock)
         {
             // <yes> <report> REENTRANCY
-               require(_injected_mutex_var);
             if(msg.sender.call.value(_am)())
             {
                 balances[msg.sender]-=_am;

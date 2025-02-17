@@ -12,13 +12,21 @@ contract ModifierEntrancy {
 
   //If a contract has a zero balance and supports the token give them some token
   // <yes> <report> REENTRANCY
+
+   function checkForV1(uint v) internal{
+       require(v != 0);
+   }
+
+   function checkForV2(bool v) internal{
+       require(v != false);
+   }
   function airDrop() hasNoBalance supportsToken  public{
     tokenBalance[msg.sender] += 20;
   }
 
   //Checks that the contract responds the way we want
   modifier supportsToken() {
-    require(tokenBalance[msg.sender] != 0);
+    checkForV1(tokenBalance[msg.sender]);
     tokenBalance[msg.sender] = 0;
     require(keccak256(abi.encodePacked("Nu Token")) == Bank(msg.sender).supportsToken());
     _;

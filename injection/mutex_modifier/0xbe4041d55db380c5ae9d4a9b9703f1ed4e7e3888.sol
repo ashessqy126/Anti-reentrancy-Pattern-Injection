@@ -24,9 +24,11 @@ contract MONEY_BOX
     bool intitalized;
 
      modifier injected_swap(){
+     if(!_injected_mutex_var){
          _injected_mutex_var = true;
          _;
          _injected_mutex_var = false;
+        }
      }
     
     function SetMinSum(uint _val)
@@ -67,7 +69,6 @@ contract MONEY_BOX
         if( acc.balance>=MinSum && acc.balance>=_am && now>acc.unlockTime)
         {
             // <yes> <report> REENTRANCY
-               require(_injected_mutex_var);
             if(msg.sender.call.value(_am)())
             {
                 acc.balance-=_am;

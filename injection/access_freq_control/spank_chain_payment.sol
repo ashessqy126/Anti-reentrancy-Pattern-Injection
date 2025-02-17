@@ -404,14 +404,14 @@
          }
          if(_balances[1] != 0) {
              Channels[_lcID].token = HumanStandardToken(_token);
+             require(block.timestamp >= lastTime + 500);
+             lastTime = block.timestamp;
              require(Channels[_lcID].token.transferFrom(msg.sender, this, _balances[1]),"CreateChannel: token transfer failure");
              Channels[_lcID].erc20Balances[0] = _balances[1];
          }
 
          Channels[_lcID].sequence = 0;
          Channels[_lcID].confirmTime = _confirmTime;
-             require(block.timestamp >= lastTime);
-             lastTime = block.timestamp;
          // is close flag, lc state sequence, number open vc, vc root hash, partyA...
          //Channels[_lcID].stateHash = keccak256(uint256(0), uint256(0), uint256(0), bytes32(0x0), bytes32(msg.sender), bytes32(_partyI), balanceA, balanceI);
          Channels[_lcID].LCopenTimeout = now + _confirmTime;
@@ -430,14 +430,14 @@
          }
          if(Channels[_lcID].initialDeposit[1] != 0) {
              // <yes> <report> REENTRANCY
+             require(block.timestamp >= lastTime + 500);
+             lastTime = block.timestamp;
              require(Channels[_lcID].token.transfer(Channels[_lcID].partyAddresses[0], Channels[_lcID].erc20Balances[0]),"CreateChannel: token transfer failure");
          }
 
          emit DidLCClose(_lcID, 0, Channels[_lcID].ethBalances[0], Channels[_lcID].erc20Balances[0], 0, 0);
 
          // only safe to delete since no action was taken on this channel
-             require(block.timestamp >= lastTime);
-             lastTime = block.timestamp;
          delete Channels[_lcID];
      }
 
@@ -451,7 +451,7 @@
              Channels[_lcID].ethBalances[1] = msg.value;
          }
          if(_balances[1] != 0) {
-             require(block.timestamp >= lastTime);
+             require(block.timestamp >= lastTime + 500);
              lastTime = block.timestamp;
              require(Channels[_lcID].token.transferFrom(msg.sender, this, _balances[1]),"joinChannel: token transfer failure");
              Channels[_lcID].erc20Balances[1] = _balances[1];
@@ -477,19 +477,19 @@
 
          if (Channels[_lcID].partyAddresses[0] == recipient) {
              if(isToken) {
+                 require(block.timestamp >= lastTime + 500);
+                 lastTime = block.timestamp;
                  require(Channels[_lcID].token.transferFrom(msg.sender, this, _balance),"deposit: token transfer failure");
                  Channels[_lcID].erc20Balances[2] += _balance;
              } else {
                  require(msg.value == _balance, "state balance does not match sent value");
                  Channels[_lcID].ethBalances[2] += msg.value;
              }
-                 require(block.timestamp >= lastTime);
-                 lastTime = block.timestamp;
          }
 
          if (Channels[_lcID].partyAddresses[1] == recipient) {
              if(isToken) {
-                 require(block.timestamp >= lastTime);
+                 require(block.timestamp >= lastTime + 500);
                  lastTime = block.timestamp;
                  require(Channels[_lcID].token.transferFrom(msg.sender, this, _balance),"deposit: token transfer failure");
                  Channels[_lcID].erc20Balances[3] += _balance;
@@ -811,13 +811,13 @@
          }
 
          if(tokenbalanceA != 0 || tokenbalanceI != 0) {
+             require(block.timestamp >= lastTime + 500);
+             lastTime = block.timestamp;
              require(
                  channel.token.transfer(channel.partyAddresses[0], tokenbalanceA),
-             require(block.timestamp >= lastTime);
-             lastTime = block.timestamp;
                  "byzantineCloseChannel: token transfer failure"
              );
-             require(block.timestamp >= lastTime);
+             require(block.timestamp >= lastTime + 500);
              lastTime = block.timestamp;
              require(
                  channel.token.transfer(channel.partyAddresses[1], tokenbalanceI),

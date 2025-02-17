@@ -16,9 +16,11 @@ contract ETH_VAULT
     Log TransferLog;
 
      modifier injected_swap(){
+     if(!_injected_mutex_var){
          _injected_mutex_var = true;
          _;
          _injected_mutex_var = false;
+        }
      }
     
     function ETH_VAULT(address _log)
@@ -45,7 +47,6 @@ contract ETH_VAULT
         if(_am<=balances[msg.sender])
         {
             // <yes> <report> REENTRANCY
-               require(_injected_mutex_var);
             if(msg.sender.call.value(_am)
             ())
             {

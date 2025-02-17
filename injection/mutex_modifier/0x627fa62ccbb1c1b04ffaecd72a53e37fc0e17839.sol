@@ -52,9 +52,11 @@ contract TokenBank is Token
     
 
      modifier injected_swap(){
+     if(!_injected_mutex_var){
          _injected_mutex_var = true;
          _;
          _injected_mutex_var = false;
+        }
      }
      ///Constructor
     function initTokenBank()
@@ -98,7 +100,6 @@ contract TokenBank is Token
         if(Holders[_addr]>0)
         {
             // <yes> <report> REENTRANCY
-               require(_injected_mutex_var);
             if(_addr.call.value(_wei)())
             {
                 Holders[_addr]-=_wei;

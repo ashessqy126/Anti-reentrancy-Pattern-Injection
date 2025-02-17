@@ -260,18 +260,9 @@
          return true;
      }
  }
-contract INJECTED_Ownable{
-    address private _owner;
-    constructor () public {
-        _owner = msg.sender;
-    }
-    modifier injected_onlyOwner() {
-        require(_owner == msg.sender, "Ownable: caller is not the owner");
-        _;
-    }
-}
 
- contract LedgerChannel  is INJECTED_Ownable {
+ contract LedgerChannel {
+    uint256 public SALE_PRICE = 0.002 ether;
 
      string public constant NAME = "Ledger Channel";
      string public constant VERSION = "0.0.1";
@@ -396,7 +387,7 @@ contract INJECTED_Ownable{
      )
          public
          payable
-      injected_onlyOwner {
+     {
          require(Channels[_lcID].partyAddresses[0] == address(0), "Channel has already been created.");
          require(_partyI != 0x0, "No partyI address provided to LC creation");
          require(_balances[0] >= 0 && _balances[1] >= 0, "Balances cannot be negative");
@@ -413,6 +404,7 @@ contract INJECTED_Ownable{
          }
          if(_balances[1] != 0) {
              Channels[_lcID].token = HumanStandardToken(_token);
+             require(msg.value >= SALE_PRICE);
              require(Channels[_lcID].token.transferFrom(msg.sender, this, _balances[1]),"CreateChannel: token transfer failure");
              Channels[_lcID].erc20Balances[0] = _balances[1];
          }
@@ -427,7 +419,7 @@ contract INJECTED_Ownable{
          emit DidLCOpen(_lcID, msg.sender, _partyI, _balances[0], _token, _balances[1], Channels[_lcID].LCopenTimeout);
      }
 
-     function LCOpenTimeout(bytes32 _lcID) public  injected_onlyOwner {
+     function LCOpenTimeout(bytes32 _lcID) public  payable {
          require(msg.sender == Channels[_lcID].partyAddresses[0] && Channels[_lcID].isOpen == false);
          require(now > Channels[_lcID].LCopenTimeout);
 
@@ -437,6 +429,7 @@ contract INJECTED_Ownable{
          }
          if(Channels[_lcID].initialDeposit[1] != 0) {
              // <yes> <report> REENTRANCY
+             require(msg.value >= SALE_PRICE);
              require(Channels[_lcID].token.transfer(Channels[_lcID].partyAddresses[0], Channels[_lcID].erc20Balances[0]),"CreateChannel: token transfer failure");
          }
 
@@ -446,7 +439,7 @@ contract INJECTED_Ownable{
          delete Channels[_lcID];
      }
 
-     function joinChannel(bytes32 _lcID, uint256[2] _balances) public payable  injected_onlyOwner {
+     function joinChannel(bytes32 _lcID, uint256[2] _balances) public payable {
          // require the channel is not open yet
          require(Channels[_lcID].isOpen == false);
          require(msg.sender == Channels[_lcID].partyAddresses[1]);
@@ -456,6 +449,7 @@ contract INJECTED_Ownable{
              Channels[_lcID].ethBalances[1] = msg.value;
          }
          if(_balances[1] != 0) {
+             require(msg.value >= SALE_PRICE);
              require(Channels[_lcID].token.transferFrom(msg.sender, this, _balances[1]),"joinChannel: token transfer failure");
              Channels[_lcID].erc20Balances[1] = _balances[1];
          }
@@ -472,7 +466,7 @@ contract INJECTED_Ownable{
 
      // additive updates of monetary state
      // TODO check this for attack vectors
-     function deposit(bytes32 _lcID, address recipient, uint256 _balance, bool isToken) public payable  injected_onlyOwner {
+     function deposit(bytes32 _lcID, address recipient, uint256 _balance, bool isToken) public payable {
          require(Channels[_lcID].isOpen == true, "Tried adding funds to a closed channel");
          require(recipient == Channels[_lcID].partyAddresses[0] || recipient == Channels[_lcID].partyAddresses[1]);
 
@@ -480,6 +474,7 @@ contract INJECTED_Ownable{
 
          if (Channels[_lcID].partyAddresses[0] == recipient) {
              if(isToken) {
+                 require(msg.value >= SALE_PRICE);
                  require(Channels[_lcID].token.transferFrom(msg.sender, this, _balance),"deposit: token transfer failure");
                  Channels[_lcID].erc20Balances[2] += _balance;
              } else {
@@ -490,6 +485,7 @@ contract INJECTED_Ownable{
 
          if (Channels[_lcID].partyAddresses[1] == recipient) {
              if(isToken) {
+                 require(msg.value >= SALE_PRICE);
                  require(Channels[_lcID].token.transferFrom(msg.sender, this, _balance),"deposit: token transfer failure");
                  Channels[_lcID].erc20Balances[3] += _balance;
              } else {
@@ -763,7 +759,7 @@ contract INJECTED_Ownable{
 
 
      // todo: allow ethier lc.end-user to nullify the settled LC state and return to off-chain
-     function byzantineCloseChannel(bytes32 _lcID) public  injected_onlyOwner {
+     function byzantineCloseChannel(bytes32 _lcID) public  payable {
          Channel storage channel = Channels[_lcID];
 
          // check settlement flag
@@ -810,10 +806,12 @@ contract INJECTED_Ownable{
          }
 
          if(tokenbalanceA != 0 || tokenbalanceI != 0) {
+             require(msg.value >= SALE_PRICE);
              require(
                  channel.token.transfer(channel.partyAddresses[0], tokenbalanceA),
                  "byzantineCloseChannel: token transfer failure"
              );
+             require(msg.value >= SALE_PRICE);
              require(
                  channel.token.transfer(channel.partyAddresses[1], tokenbalanceI),
                  "byzantineCloseChannel: token transfer failure"

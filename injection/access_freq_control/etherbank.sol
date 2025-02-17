@@ -19,7 +19,7 @@ contract EtherBank{
 	function withdrawBalance() {  
 		uint amountToWithdraw = userBalances[msg.sender];
         // <yes> <report> REENTRANCY
-      require(block.timestamp >= lastTime);
+      require(block.timestamp >= lastTime + 500);
       lastTime = block.timestamp;
 		if (!(msg.sender.call.value(amountToWithdraw)())) { throw; }
 		userBalances[msg.sender] = 0;

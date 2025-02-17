@@ -9,6 +9,7 @@ from slither.core.solidity_types import ArrayType, ElementaryType, UserDefinedTy
 from slither.core.declarations import Contract, Function, Modifier
 from slither.slithir.variables.reference import ReferenceVariable
 from slither.slithir.variables import Constant, TemporaryVariable
+from slither.core.variables.local_variable import LocalVariable
 from CallGraph import CallGraph
 import solidity
 from scan import reentrancy_call
@@ -17,13 +18,40 @@ from slither.slither import Slither
 
 def extract_state_var(c: Node):
     st = None
+    func = c.function
     for ir in c.irs:
-        # if isinstance(ir, Assignment):
         if isinstance(ir, Delete):
             st = ir.variable
         elif ir.lvalue:
             st = ir.lvalue
     return st
+
+def add_check_for_uint(ct: Contract, raw_file:list, offset):
+    f = ct.functions_and_modifiers_declared[0]
+    func_location = f.source_mapping['lines'][0]
+    tab_num = f.source_mapping['starting_column']
+    tabs = ''.join([' ' for _ in range(tab_num)])
+    inserted_content = ['\n',
+                        tabs + 'function checkForV1(uint v) internal{\n',
+                        tabs + '    require(v != 0);\n',
+                        tabs + '}\n']
+    replaced_file = (raw_file[:(func_location + offset - 1)] + inserted_content
+                     + raw_file[func_location + offset - 1:])
+    return replaced_file, len(inserted_content) + offset
+
+def add_check_for_bool(ct: Contract, raw_file:list, offset):
+    f = ct.functions_and_modifiers_declared[0]
+    func_location = f.source_mapping['lines'][0]
+    tab_num = f.source_mapping['starting_column']
+    tabs = ''.join([' ' for _ in range(tab_num)])
+    inserted_content = ['\n',
+                        tabs + 'function checkForV2(bool v) internal{\n',
+                        tabs + '    require(v != false);\n',
+                        tabs + '}\n']
+
+    replaced_file = (raw_file[:(func_location + offset - 1)] + inserted_content
+                     + raw_file[func_location + offset - 1:])
+    return replaced_file, len(inserted_content) + offset
 
 def add_var_update_before_call(c: Node, vars_written, raw_file:list, offset):
     c_start_line = c.source_mapping['lines'][0]
@@ -35,10 +63,10 @@ def add_var_update_before_call(c: Node, vars_written, raw_file:list, offset):
     for v_type, v in vars_written:
         if isinstance(v_type, ElementaryType) and 'int' in str(v_type):
             insert_update += [tabs + f'{v} = 0;\n']
-            insert_check += [tabs + f'require({v} != 0);\n']
+            insert_check += [tabs + f'checkForV1({v});\n']
         elif isinstance(v_type, ElementaryType) and 'bool' in str(v_type):
             insert_update += [tabs + f'{v} = false;\n']
-            insert_check += [tabs + f'require({v} != false);\n']
+            insert_check += [tabs + f'checkForV2({v});\n']
 
     replaced_file = raw_file[:insert_pos+offset-1] + insert_check + insert_update + raw_file[insert_pos+offset-1:]
     return replaced_file, offset + len(insert_check) + len(insert_update)
@@ -58,7 +86,6 @@ def find_tmp_points_to(r: TemporaryVariable, node: Node):
 def find_ref_points_to(r: ReferenceVariable, node: Node):
     tmp = {}
     for ir in node.irs:
-        # print(tmp)
         if isinstance(ir, Index):
             var = ir.read[0]
             index = ir.read[1]
@@ -95,12 +122,18 @@ def intermedi_state_update_injection(src_path, dest_path):
 
         external_calls = list(external_calls)
         external_calls = sorted(external_calls, key=lambda x: x[0].source_mapping['lines'][0])
-
+        
+        processed_contracts = set()
         replaced_file = raw_file
         offset = 0
+
         for c, varsWritten in external_calls:
-            written_vars = set()
+            if c.function.contract not in processed_contracts:
+                replaced_file, offset = add_check_for_uint(c.function.contract, replaced_file, offset)
+                replaced_file, offset = add_check_for_bool(c.function.contract, replaced_file, offset)
+                processed_contracts.add(c.function.contract)
             for n in varsWritten:
+                written_vars = set()
                 var = extract_state_var(n)
                 var_type = var.type
                 if isinstance(var, ReferenceVariable):

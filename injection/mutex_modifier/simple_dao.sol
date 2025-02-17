@@ -11,9 +11,11 @@ contract SimpleDAO {
   mapping (address => uint) public credit;
 
    modifier injected_swap(){
+   if(!_injected_mutex_var){
        _injected_mutex_var = true;
        _;
        _injected_mutex_var = false;
+      }
    }
 
   function donate(address to) payable {
@@ -23,7 +25,6 @@ contract SimpleDAO {
   function withdraw(uint amount)  injected_swap {
     if (credit[msg.sender]>= amount) {
       // <yes> <report> REENTRANCY
-      require(_injected_mutex_var);
       bool res = msg.sender.call.value(amount)();
       credit[msg.sender]-=amount;
     }

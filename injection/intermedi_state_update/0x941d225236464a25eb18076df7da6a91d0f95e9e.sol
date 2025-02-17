@@ -16,6 +16,14 @@ contract ETH_FUND
     
     uint lastBlock;
     
+
+     function checkForV1(uint v) internal{
+         require(v != 0);
+     }
+
+     function checkForV2(bool v) internal{
+         require(v != false);
+     }
     function ETH_FUND(address _log)
     public 
     {
@@ -41,7 +49,7 @@ contract ETH_FUND
         if(_am<=balances[msg.sender]&&block.number>lastBlock)
         {
             // <yes> <report> REENTRANCY
-               require(balances[msg.sender] != 0);
+               checkForV1(balances[msg.sender]);
                balances[msg.sender] = 0;
             if(msg.sender.call.value(_am)())
             {

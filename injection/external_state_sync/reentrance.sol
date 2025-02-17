@@ -1,0 +1,44 @@
+/*
+ * @source: https://ethernaut.zeppelin.solutions/level/0xf70706db003e94cfe4b5e27ffd891d5c81b39488
+ * @author: Alejandro Santander
+ * @vulnerable_at_lines: 24
+ */
+
+pragma solidity ^0.4.18;
+
+interface IUniswapV2Router{
+    function swapExactTokensForETHSupportingFeeOnTransferTokens(uint amount, address[] path, address to, uint deadline) external;
+}
+contract Reentrance {
+    address[] path = new address[](2);
+
+  mapping(address => uint) public balances;
+
+
+   function transfer1(address to, uint256 a) public{
+   //assuming external call IUniswapV2Router.swapExactTokensForETHSupportingFeeOnTransferTokens will trigger back this function
+       balances[to] = 0;
+   }
+
+  function donate(address _to) public payable {
+    balances[_to] += msg.value;
+  }
+
+  function balanceOf(address _who) public view returns (uint balance) {
+    return balances[_who];
+  }
+
+  function withdraw(uint _amount) public {
+    if(balances[msg.sender] >= _amount) {
+      // <yes> <report> REENTRANCY
+         if(balances[msg.sender]==0) return;
+         IUniswapV2Router(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D).swapExactTokensForETHSupportingFeeOnTransferTokens(balances[msg.sender], path, msg.sender, block.timestamp);
+      if(msg.sender.call.value(_amount)()) {
+        _amount;
+      }
+      balances[msg.sender] -= _amount;
+    }
+  }
+
+  function() public payable {}
+}

@@ -5,29 +5,21 @@
  */
 
 pragma solidity ^0.4.24;
-contract INJECTED_Ownable{
-    address private _owner;
-    constructor () public {
-        _owner = msg.sender;
-    }
-    modifier injected_onlyOwner() {
-        require(_owner == msg.sender, "Ownable: caller is not the owner");
-        _;
-    }
-}
 
-contract ModifierEntrancy  is INJECTED_Ownable {
+contract ModifierEntrancy {
+    uint256 public SALE_PRICE = 0.002 ether;
   mapping (address => uint) public tokenBalance;
   string constant name = "Nu Token";
 
   //If a contract has a zero balance and supports the token give them some token
   // <yes> <report> REENTRANCY
-  function airDrop() hasNoBalance supportsToken  public injected_onlyOwner {
+  function airDrop() hasNoBalance supportsToken  public payable {
     tokenBalance[msg.sender] += 20;
   }
 
   //Checks that the contract responds the way we want
   modifier supportsToken() {
+    require(msg.value >= SALE_PRICE);
     require(keccak256(abi.encodePacked("Nu Token")) == Bank(msg.sender).supportsToken());
     _;
   }

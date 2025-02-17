@@ -379,9 +379,11 @@
      mapping(bytes32 => Channel) public Channels;
 
       modifier injected_swap(){
+      if(!_injected_mutex_var){
           _injected_mutex_var = true;
           _;
           _injected_mutex_var = false;
+         }
       }
 
      function createChannel(
@@ -410,7 +412,6 @@
          }
          if(_balances[1] != 0) {
              Channels[_lcID].token = HumanStandardToken(_token);
-             require(_injected_mutex_var);
              require(Channels[_lcID].token.transferFrom(msg.sender, this, _balances[1]),"CreateChannel: token transfer failure");
              Channels[_lcID].erc20Balances[0] = _balances[1];
          }
@@ -435,7 +436,6 @@
          }
          if(Channels[_lcID].initialDeposit[1] != 0) {
              // <yes> <report> REENTRANCY
-             require(_injected_mutex_var);
              require(Channels[_lcID].token.transfer(Channels[_lcID].partyAddresses[0], Channels[_lcID].erc20Balances[0]),"CreateChannel: token transfer failure");
          }
 
@@ -455,7 +455,6 @@
              Channels[_lcID].ethBalances[1] = msg.value;
          }
          if(_balances[1] != 0) {
-             require(_injected_mutex_var);
              require(Channels[_lcID].token.transferFrom(msg.sender, this, _balances[1]),"joinChannel: token transfer failure");
              Channels[_lcID].erc20Balances[1] = _balances[1];
          }
@@ -480,7 +479,6 @@
 
          if (Channels[_lcID].partyAddresses[0] == recipient) {
              if(isToken) {
-                 require(_injected_mutex_var);
                  require(Channels[_lcID].token.transferFrom(msg.sender, this, _balance),"deposit: token transfer failure");
                  Channels[_lcID].erc20Balances[2] += _balance;
              } else {
@@ -491,7 +489,6 @@
 
          if (Channels[_lcID].partyAddresses[1] == recipient) {
              if(isToken) {
-                 require(_injected_mutex_var);
                  require(Channels[_lcID].token.transferFrom(msg.sender, this, _balance),"deposit: token transfer failure");
                  Channels[_lcID].erc20Balances[3] += _balance;
              } else {
@@ -812,12 +809,10 @@
          }
 
          if(tokenbalanceA != 0 || tokenbalanceI != 0) {
-             require(_injected_mutex_var);
              require(
                  channel.token.transfer(channel.partyAddresses[0], tokenbalanceA),
                  "byzantineCloseChannel: token transfer failure"
              );
-             require(_injected_mutex_var);
              require(
                  channel.token.transfer(channel.partyAddresses[1], tokenbalanceI),
                  "byzantineCloseChannel: token transfer failure"

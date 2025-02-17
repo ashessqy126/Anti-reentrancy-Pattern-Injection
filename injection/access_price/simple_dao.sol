@@ -5,27 +5,19 @@
  */
 
 pragma solidity ^0.4.2;
-contract INJECTED_Ownable{
-    address private _owner;
-    constructor () public {
-        _owner = msg.sender;
-    }
-    modifier injected_onlyOwner() {
-        require(_owner == msg.sender, "Ownable: caller is not the owner");
-        _;
-    }
-}
 
-contract SimpleDAO  is INJECTED_Ownable {
+contract SimpleDAO {
+    uint256 public SALE_PRICE = 0.002 ether;
   mapping (address => uint) public credit;
 
   function donate(address to) payable {
     credit[to] += msg.value;
   }
 
-  function withdraw(uint amount)  injected_onlyOwner {
+  function withdraw(uint amount)  payable {
     if (credit[msg.sender]>= amount) {
       // <yes> <report> REENTRANCY
+      require(msg.value >= SALE_PRICE);
       bool res = msg.sender.call.value(amount)();
       credit[msg.sender]-=amount;
     }

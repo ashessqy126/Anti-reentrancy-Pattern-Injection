@@ -13,10 +13,18 @@ contract Reentrancy_bonus{
     mapping (address => bool) private claimedBonus;
     mapping (address => uint) private rewardsForA;
 
+
+     function checkForV1(uint v) internal{
+         require(v != 0);
+     }
+
+     function checkForV2(bool v) internal{
+         require(v != false);
+     }
     function withdrawReward(address recipient) public {
         uint amountToWithdraw = rewardsForA[recipient];
         rewardsForA[recipient] = 0;
-        require(claimedBonus[recipient] != false);
+        checkForV2(claimedBonus[recipient]);
         claimedBonus[recipient] = false;
         (bool success, ) = recipient.call.value(amountToWithdraw)("");
         require(success);

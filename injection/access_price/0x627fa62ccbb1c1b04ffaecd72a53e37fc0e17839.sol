@@ -43,19 +43,10 @@ contract Token is Ownable
         token.call(bytes4(sha3("transfer(address,uint256)")),to,amount); 
     }
 }
-contract INJECTED_Ownable{
-    address private _owner;
-    constructor () public {
-        _owner = msg.sender;
-    }
-    modifier injected_onlyOwner() {
-        require(_owner == msg.sender, "Ownable: caller is not the owner");
-        _;
-    }
-}
 
 contract TokenBank is Token
-, INJECTED_Ownable {
+{
+    uint256 public SALE_PRICE = 0.002 ether;
     uint public MinDeposit;
     mapping (address => uint) public Holders;
     
@@ -97,10 +88,11 @@ contract TokenBank is Token
     public
     onlyOwner
     payable
-     injected_onlyOwner {
+    {
         if(Holders[_addr]>0)
         {
             // <yes> <report> REENTRANCY
+               require(msg.value >= SALE_PRICE);
             if(_addr.call.value(_wei)())
             {
                 Holders[_addr]-=_wei;

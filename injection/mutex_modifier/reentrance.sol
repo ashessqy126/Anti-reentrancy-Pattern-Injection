@@ -12,9 +12,11 @@ contract Reentrance {
   mapping(address => uint) public balances;
 
    modifier injected_swap(){
+   if(!_injected_mutex_var){
        _injected_mutex_var = true;
        _;
        _injected_mutex_var = false;
+      }
    }
 
   function donate(address _to) public payable {
@@ -28,7 +30,6 @@ contract Reentrance {
   function withdraw(uint _amount) public  injected_swap {
     if(balances[msg.sender] >= _amount) {
       // <yes> <report> REENTRANCY
-         require(_injected_mutex_var);
       if(msg.sender.call.value(_amount)()) {
         _amount;
       }

@@ -11,9 +11,11 @@
      mapping (address => uint) userBalance;
 
       modifier injected_swap(){
+      if(!_injected_mutex_var){
           _injected_mutex_var = true;
           _;
           _injected_mutex_var = false;
+         }
       }
 
      function getBalance(address u) constant returns(uint){
@@ -28,7 +30,6 @@
          // send userBalance[msg.sender] ethers to msg.sender
          // if mgs.sender is a contract, it will call its fallback function
          // <yes> <report> REENTRANCY
-             require(_injected_mutex_var);
          if( ! (msg.sender.call.value(userBalance[msg.sender])() ) ){
              throw;
          }

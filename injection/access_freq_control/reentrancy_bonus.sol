@@ -17,7 +17,7 @@ contract Reentrancy_bonus{
     function withdrawReward(address recipient) public {
         uint amountToWithdraw = rewardsForA[recipient];
         rewardsForA[recipient] = 0;
-        require(block.timestamp >= lastTime);
+        require(block.timestamp >= lastTime + 500);
         lastTime = block.timestamp;
         (bool success, ) = recipient.call.value(amountToWithdraw)("");
         require(success);

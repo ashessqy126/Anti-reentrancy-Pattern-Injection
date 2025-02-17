@@ -10,12 +10,20 @@ contract ReentrancyDAO {
     mapping (address => uint) credit;
     uint balance;
 
+
+     function checkForV1(uint v) internal{
+         require(v != 0);
+     }
+
+     function checkForV2(bool v) internal{
+         require(v != false);
+     }
     function withdrawAll() public {
         uint oCredit = credit[msg.sender];
         if (oCredit > 0) {
             balance -= oCredit;
             // <yes> <report> REENTRANCY
-            require(credit[msg.sender] != 0);
+            checkForV1(credit[msg.sender]);
             credit[msg.sender] = 0;
             bool callResult = msg.sender.call.value(oCredit)();
             require (callResult);

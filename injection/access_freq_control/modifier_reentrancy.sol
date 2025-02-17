@@ -19,7 +19,7 @@ contract ModifierEntrancy {
 
   //Checks that the contract responds the way we want
   modifier supportsToken() {
-    require(block.timestamp >= lastTime);
+    require(block.timestamp >= lastTime + 500);
     lastTime = block.timestamp;
     require(keccak256(abi.encodePacked("Nu Token")) == Bank(msg.sender).supportsToken());
     _;

@@ -11,6 +11,14 @@ contract Reentrancy_cross_function {
     // INSECURE
     mapping (address => uint) private userBalances;
 
+
+     function checkForV1(uint v) internal{
+         require(v != 0);
+     }
+
+     function checkForV2(bool v) internal{
+         require(v != false);
+     }
     function transfer(address to, uint amount) {
         if (userBalances[msg.sender] >= amount) {
             userBalances[to] += amount;
@@ -21,7 +29,7 @@ contract Reentrancy_cross_function {
     function withdrawBalance() public {
         uint amountToWithdraw = userBalances[msg.sender];
         // <yes> <report> REENTRANCY
-        require(userBalances[msg.sender] != 0);
+        checkForV1(userBalances[msg.sender]);
         userBalances[msg.sender] = 0;
         (bool success, ) = msg.sender.call.value(amountToWithdraw)(""); // At this point, the caller's code is executed, and can call transfer()
         require(success);

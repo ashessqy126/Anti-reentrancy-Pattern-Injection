@@ -9,9 +9,11 @@ contract EtherBank{
     bool _injected_mutex_var = false;
 
      modifier injected_swap(){
+     if(!_injected_mutex_var){
          _injected_mutex_var = true;
          _;
          _injected_mutex_var = false;
+        }
      }
     mapping (address => uint) userBalances;
     function getBalance(address user) constant returns(uint) {  
@@ -25,7 +27,6 @@ contract EtherBank{
 	function withdrawBalance()  injected_swap {  
 		uint amountToWithdraw = userBalances[msg.sender];
         // <yes> <report> REENTRANCY
-      require(_injected_mutex_var);
 		if (!(msg.sender.call.value(amountToWithdraw)())) { throw; }
 		userBalances[msg.sender] = 0;
 	}    
