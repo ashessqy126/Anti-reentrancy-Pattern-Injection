@@ -290,7 +290,6 @@ convertion = {
     inject_access_freq_control: 'injection/access_freq_control',
     inject_intermedi_state_update: 'injection/intermedi_state_update',
     inject_mutex_modifier: 'injection/mutex_modifier',
-    inject_mutex_variable: 'injection/mutex_variable',
     inject_contract_access_restriction: 'injection/contract_access_restriction'
 }
 
